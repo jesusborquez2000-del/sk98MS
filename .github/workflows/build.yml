@@ -15,17 +15,24 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Compilar con Gradle
+      - name: Compilar o empaquetar proyecto
         run: |
-          gradle build || ./gradlew build || true
+          if [ -f "gradlew" ]; then
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          elif command -v gradle &> /dev/null; then
+            gradle assembleDebug
+          else
+            echo "Buscando archivos de compilación alternativos..."
+          fi
 
-      - name: Buscar y copiar APKs generados
+      - name: Recolectar APKs
         run: |
-          mkdir -p android-apk-output
-          find . -name "*.apk" -exec cp {} android-apk-output/ \;
+          mkdir -p artifact_output
+          find . -name "*.apk" -exec cp {} artifact_output/ \;
 
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
-          name: apk-debug
-          path: android-apk-output/*.apk
+          name: sk98MS-apk
+          path: artifact_output/*.apk

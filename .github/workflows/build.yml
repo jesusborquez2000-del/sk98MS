@@ -15,20 +15,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Compilar proyecto con gradle directo
+      - name: Compilar con Gradle
         run: |
-          export ANDROID_HOME=$HOME/android-sdk
-          mkdir -p $ANDROID_HOME
-          gradle assembleDebug || ./gradlew assembleDebug || true
+          gradle build || ./gradlew build || true
 
-      - name: Buscar y respaldar APK generado
+      - name: Buscar y copiar APKs generados
         run: |
-          find . -name "*.apk"
+          mkdir -p android-apk-output
+          find . -name "*.apk" -exec cp {} android-apk-output/ \;
 
       - name: Subir APK generado
         uses: actions/upload-artifact@v4
         with:
           name: apk-debug
-          path: |
-            app/build/outputs/apk/debug/*.apk
-            **/build/outputs/apk/debug/*.apk
+          path: android-apk-output/*.apk
